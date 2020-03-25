@@ -4,9 +4,9 @@
 #git clone https://github.com/vsespb/mt-aws-glacier.git /etc/aws-glacier
 
 #USER VARIABLES--CHANGE THESE
-glacier_key="AKIA3N5ZXHEZRXTA2EM6"
-glacier_secret="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"
-glacier_region="us-east-1"
+glacier_key=""
+glacier_secret=""
+glacier_region="" #us-east-1
 glacier_vault="Mongobackups"
 logfile=/var/log/aws-glacier/sync.log
 #end user variables
