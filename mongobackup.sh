@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # mongo backup script
-#Cron
-#30 */6 * * * ~/mongobackup.sh
 #Install:
-#wget -O ~/mongobackup.sh 
+#wget -O ~/mongobackup.sh https://raw.githubusercontent.com/holmes6/yo/master/mongobackup.sh && chmod 755 ~/mongobackup.sh && echo "30 */6 * * * ~/mongobackup.sh" >> ~/cron.txt
+#crontab ~/cron.txt
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
 MAILTO="jwaltz666@gmail.com;";
