@@ -1,0 +1,134 @@
+#!/bin/bash
+#Set variable, prefer to detect this in future version.
+backupdir="/mysqlbackups"
+backupscript="~/mysqlbackup.sh"
+
+#daily backup dir must be larger than this size
+minsize="899" #in KB - Tune this as size of backup changes
+
+#each day must have at least this many backup files
+minarchives="4"  #Tune this as number dbs changes
+
+#these db names must be backed up (comma with no spaces to delimit) e.g. "db1,db2,db3"
+mandatorydb="catapult,event_login,livehelperchat"
+
+########### END VARIABLES ############
+
+#set a stamp so we can create a unique temp file
+stamp=`date +%s`
+
+#Initialize failure message
+failure=""
+
+# Is the crontab set?
+iscron=`sudo crontab -l -u root|grep -ve "^#"| grep -ce "$backupscript"`
+        if [ $iscron -eq 0 ] ; then
+        failure="$failure cron config failed"
+        fi
+#if 1 the backup routine is configured in root crontab
+
+#can we login to mysql successfully?
+mycnf=`sudo cat /root/.my.cnf`
+myuser=`echo $mycnf|cut -d "=" -f 2|cut -d " " -f 1`
+mypass=`echo $mycnf|cut -d "=" -f 3|cut -d " " -f 1`
+mysqllogin=`/usr/lib/nagios/plugins/check_mysql_health --user "$myuser" --password "$mypass" --mode connection-time`
+        if [ $? -eq 0 ] ; then
+        #/root/.my.cnf contains a valid username and password that is accepted by mysql
+        ismysql=1
+        else
+        ismysql=0
+        failure="$failure mysql login failed"
+        fi
+
+# Is the backup partition mounted and is there free space
+backupdisk=`df|grep "$backupdir"|cut -d " " -f 1`
+isdisk=`/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p "$backupdisk"`
+        if [ $? -eq 0 ] ; then
+        #backupdisk is mounted and has free space
+        isbackup=1
+        else
+        isbackup=0
+        failure="$failure backup disk check failed"
+        fi
+
+# Is yesterday backup big enough?
+yesterday=`date +%a --date="1 days ago"`
+backupsize=`du -sbk $backupdir/$yesterday/|awk '{print $1}'`
+
+
+        if [ "$backupsize" -ge $minsize ] ; then
+        #size of yesterday backup is greater than min
+        issize=1
+        else
+        issize=0
+        failure="$failure backup not large enough"
+        fi
+
+#Are there enough files?
+#list all the backup files
+find $backupdir/$yesterday/ -name "*.sql.gz" > /tmp/$stamp-files
+#filter out the system file backups for the count
+grep -v "mysql-" /tmp/$stamp-files|grep -v performance_schema|grep -v sys > /tmp/$stamp-filesfiltered
+numarchives=`wc -l /tmp/$stamp-filesfiltered |awk '{print $1}'`
+
+        if [ "$numarchives" -ge $minarchives ] ; then
+        #more archives are present than min
+        isarchives=1
+        else
+        isarchives=0
+        failure="$failure too few archives present"
+        fi
+
+# Are databases $x and $y present in backup?
+
+failmatch=0
+IFS=',' read -r -a array <<< "$mandatorydb"
+        for element in "${array[@]}" ; do
+        nummatches=`grep -ce "$element-" /tmp/$stamp-files`
+                if [ $nummatches -lt 1 ] ; then
+                failmatch=1
+                failure="$failure $element db backup not present"
+                fi
+        done
+        if [ $failmatch -ne 1 ] ; then
+        #all the mandatory dbs are present in backup
+        ismandatory=1
+        else
+        ismandatory=0
+        fi
+
+# Are the db files from the day we expect?
+allfiles=`find $backupdir/$yesterday/ -name "*.sql.gz"|wc -l`
+dayolds=`find $backupdir/$yesterday/ -name "*.sql.gz" -daystart -mtime 1|wc -l`
+        if [ $allfiles -eq $dayolds ] ; then
+        iscurrent=1
+        else
+        iscurrent=0
+        failure="$failure Unexpected number of current backups"
+        fi
+
+#remove any temp files created
+rm -f /tmp/$stamp-file*
+
+
+#If all conditions are met return OK/0. Else return critical and show errors.
+elements=0
+results=0
+IFS=',' read -r -a array <<< "$iscron,$ismysql,$isbackup,$issize,$isarchives,$ismandatory,$iscurrent"
+        for element in "${array[@]}" ; do
+        elements=`expr $elements + 1`
+        results=`expr $results + $element`
+        done
+
+
+        if [ $results -lt $elements ] ; then
+        #not all tests were passed
+        echo "CRITICAL - $failure"
+        exit 2
+        elif [ $results -eq $elements ] ; then
+        echo "OK - DB Backups passed all tests"
+        exit 0
+        else
+        echo "UNKNOWN - Check encountered unexpected result"
+        exit 3
+        fi
