@@ -1,5 +1,6 @@
 #!/bin/bash
-#Set variable, prefer to detect this in future version.
+#Place in /usr/lib/nagios/plugins/check_mysqlbackups
+#Set variables
 backupdir="/mysqlbackups"
 backupscript="~/mysqlbackup.sh"
 
