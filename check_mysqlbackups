@@ -1,6 +1,6 @@
 #!/bin/bash
 #Install:
-#wget -O /usr/lib/nagios/plugins/check_mysqlbackups https://raw.githubusercontent.com/holmes6/yo/master/check_backups && chmod 755 /usr/lib/nagios/plugins/check_mysqlbackups
+#wget -O /usr/lib/nagios/plugins/check_mysqlbackups https://raw.githubusercontent.com/holmes6/yo/master/check_mysqlbackups && chmod 755 /usr/lib/nagios/plugins/check_mysqlbackups
 #Set variables
 backupdir="/mysqlbackups"
 backupscript="~/mysqlbackup.sh"
