@@ -1,1 +1,77 @@
 #!/bin/bash
+#Set variables
+backupdir="/backups" #mongo is implied here
+
+#backupscript="~/mongobackup.sh"
+
+#daily backup dir must be larger than this size
+minsize="400000" #in KB - Tune this as size of backup changes
+
+#each day must have at least this many backups completed
+dailyarchives="4"  #Set in cron.
+
+#Test yesterdays archives
+yesterday=`date --date='1 day ago' +%a`
+numarchives=`find $backupdir/mongo/$yesterday -name "*.tar.gz"|wc -l`
+
+        if [ $numarchives -ge $dailyarchives ] ; then
+        isnumok=1
+        else
+        isnumok=0
+        failure="$failure Not enough archives yesterday"
+        fi
+
+
+
+backupdisk=`df|grep "$backupdir"|cut -d " " -f 1`
+isdisk=`/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p "$backupdisk"`
+        if [ $? -eq 0 ] ; then
+        #backupdisk is mounted and has free space
+        isbackup=1
+        else
+        isbackup=0
+        failure="$failure backup disk check failed"
+        fi
+
+backupsize=`du -sbk $backupdir/mongo/$yesterday/|awk '{print $1}'`
+
+        if [ "$backupsize" -ge $minsize ] ; then
+        #size of yesterday backup is greater than min
+        issize=1
+        else
+        issize=0
+        failure="$failure backup not large enough"
+        fi
+
+# Are the db files from the day we expect?
+allfiles=`find $backupdir/mongo/$yesterday/ -name "*.sql.gz"|wc -l`
+dayolds=`find $backupdir/mongo/$yesterday/ -name "*.sql.gz" -daystart -mtime 1|wc -l`
+        if [ $allfiles -eq $dayolds ] ; then
+        iscurrent=1
+        else
+        iscurrent=0
+        failure="$failure Unexpected number of current backups"
+        fi
+
+
+#If all conditions are met return OK/0. Else return critical and show errors.
+elements=0
+results=0
+IFS=',' read -r -a array <<< "$isnumok,$isbackup,$issize,$iscurrent"
+        for element in "${array[@]}" ; do
+        elements=`expr $elements + 1`
+        results=`expr $results + $element`
+        done
+
+
+        if [ $results -lt $elements ] ; then
+        #not all tests were passed
+        echo "CRITICAL - $failure"
+        exit 2
+        elif [ $results -eq $elements ] ; then
+        echo "OK - DB Backups passed all tests"
+        exit 0
+        else
+        echo "UNKNOWN - Check encountered unexpected result"
+        exit 3
+        fi
