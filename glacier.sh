@@ -2,6 +2,7 @@
 #Necessary prerequisites
 #apt-get install libwww-perl libjson-xs-perl
 #git clone https://github.com/vsespb/mt-aws-glacier.git /etc/aws-glacier
+#cron 0 1 * * THU ~/glacier.sh
 
 #USER VARIABLES--CHANGE THESE
 glacier_key=""
