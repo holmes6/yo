@@ -1,7 +1,9 @@
 #!/bin/bash
 #Install:
 #wget -O /usr/lib/nagios/plugins/check_mongobackups https://raw.githubusercontent.com/holmes6/yo/master/check_mongobackups && chmod 755 /usr/lib/nagios/plugins/check_mongobackups
+#add to sudoers %nagios ALL= NOPASSWD: /usr/bin/crontab, /bin/cat
 #Set variables
+
 backupdir="/backups" #mongo is implied here
 
 #backupscript="~/mongobackup.sh"
