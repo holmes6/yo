@@ -7,26 +7,27 @@
 #USER VARIABLES--CHANGE THESE
 glacier_key=""
 glacier_secret=""
-glacier_region="" #us-east-1
-glacier_vault="Mongobackups"
+glacier_region="us-east-1"
+glacier_vault="" #Mysqlbackups
 logfile=/var/log/aws-glacier/sync.log
+backupdir=/mysqlbackups/
 #end user variables
 
 stamp=`date +%s`
 mkdir /etc/aws-glacier/config.d /etc/aws-glacier/journal.d /var/log/aws-glacier > /dev/null 2>&1
 
-	if [ ! -f "/etc/aws-glacier/config.d/my-backup-template.cfg" ]; then
-	echo "key=$glacier_key
+        if [ ! -f "/etc/aws-glacier/config.d/my-backup-template.cfg" ]; then
+        echo "key=$glacier_key
 secret=$glacier_secret
 region=$glacier_region
 protocol=https
 dir=%DIRECTORY%
 vault=$glacier_vault
 journal=/etc/aws-glacier/journal.d/$glacier_vault.journal" > /etc/aws-glacier/config.d/my-backup-template.cfg
-	fi
+        fi
 
 mkdir /tmp/upload-$stamp/
-        for i in `ls -x1 /backups/mongo/Wed/*-00*`; do
+        for i in `ls -x1 $backupdir/Wed/*-00*`; do
         ln -s $i /tmp/upload-$stamp/$stamp-`basename $i`
         done
 #echo "links created at: /tmp/upload-$stamp/$stamp`basename $i`"
@@ -43,4 +44,3 @@ bash -c '/etc/aws-glacier/mtglacier sync --config /etc/aws-glacier/config.d/my-b
         fi
 rm -Rf /tmp/upload-$stamp/
 echo "`date` - glacier.sh completed glacier backup" >> $logfile
-
