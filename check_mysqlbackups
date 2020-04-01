@@ -2,6 +2,7 @@
 #Install:
 #wget -O /usr/lib/nagios/plugins/check_mysqlbackups https://raw.githubusercontent.com/holmes6/yo/master/check_mysqlbackups && chmod 755 /usr/lib/nagios/plugins/check_mysqlbackups
 #Set variables
+# Add to sudoers: %nagios ALL= NOPASSWD: /usr/bin/crontab, /bin/cat
 backupdir="/mysqlbackups"
 backupscript="~/mysqlbackup.sh"
 
