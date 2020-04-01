@@ -10,20 +10,21 @@ glacier_secret=""
 glacier_region="us-east-1"
 glacier_vault="" #Mysqlbackups
 logfile=/var/log/aws-glacier/sync.log
-backupdir=/mysqlbackups/
+backupdir= #/backups/mongo/
+template_file=/etc/aws-glacier/config.d/my-backup-template.cfg
 #end user variables
 
 stamp=`date +%s`
 mkdir /etc/aws-glacier/config.d /etc/aws-glacier/journal.d /var/log/aws-glacier > /dev/null 2>&1
 
-        if [ ! -f "/etc/aws-glacier/config.d/my-backup-template.cfg" ]; then
+        if [ ! -f "$template_file" ]; then
         echo "key=$glacier_key
 secret=$glacier_secret
 region=$glacier_region
 protocol=https
 dir=%DIRECTORY%
 vault=$glacier_vault
-journal=/etc/aws-glacier/journal.d/$glacier_vault.journal" > /etc/aws-glacier/config.d/my-backup-template.cfg
+journal=/etc/aws-glacier/journal.d/$glacier_vault.journal" > $template_file
         fi
 
 mkdir /tmp/upload-$stamp/
@@ -34,9 +35,9 @@ mkdir /tmp/upload-$stamp/
 #ls /tmp/upload-$stamp/
 
 
-sed s=%DIRECTORY%=/tmp/upload-$stamp/=g /etc/aws-glacier/config.d/my-backup-template.cfg > /etc/aws-glacier/config.d/my-backup.cfg
-echo "`date` - glacier.sh executing glacier backup" >> /var/log/aws-glacier/sync.log
-bash -c '/etc/aws-glacier/mtglacier sync --config /etc/aws-glacier/config.d/my-backup.cfg --new >> /var/log/aws-glacier/sync.log'
+sed s=%DIRECTORY%=/tmp/upload-$stamp/=g $template_file > /etc/aws-glacier/config.d/my-backup.cfg
+echo "`date` - glacier.sh executing glacier backup" >> $logfile
+bash -c '/etc/aws-glacier/mtglacier sync --config /etc/aws-glacier/config.d/my-backup.cfg --new' >> $logfile
         if [ $? -eq 0 ] ; then
         echo "`date` - Backup Command Ran Successfully" >> $logfile
         else
