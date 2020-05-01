@@ -1,5 +1,6 @@
 #!/bin/bash
 # mysql backup script
+#apt-get install libdbd-mysql-perl libdbi-perl
 #Crontab
 #0 */6 * * * ~/mysqlbackups.sh
 
