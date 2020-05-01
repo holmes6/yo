@@ -1,6 +1,8 @@
 #!/bin/bash
 # mysql backup script
 #apt-get install libdbd-mysql-perl libdbi-perl
+#wget -O /usr/lib/nagios/plugins/check_mysql_health https://raw.githubusercontent.com/holmes6/yo/master/check_mysql_health
+#chmod 755 /usr/lib/nagios/plugins/check_mysql_health
 #Crontab
 #0 */6 * * * ~/mysqlbackups.sh
 
