@@ -1,0 +1,5 @@
+sed 's/allowed_hosts=127.0.0.1/allowed_hosts=127.0.0.1,45.79.181.247/g' /etc/nagios/nrpe.cfg -i 
+sed '/command\[check_load\]/d' /etc/nagios/nrpe.cfg -i 
+echo "command[check_disk]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /dev/xvda1
+command[check_load]=/usr/lib/nagios/plugins/check_load -r -w 2.5,2,1.5 -c 4,3.5,3" >> /etc/nagios/nrpe.cfg
+service nagios-nrpe-server restart
