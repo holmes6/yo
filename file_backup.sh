@@ -13,7 +13,7 @@ filename="filebackup_`date +%m-%d-%Y-%H.%M`"
         if [ -d "$backup_location" ]  ; then
         echo "Folder $backup_location exists.  Continuing."
         #is backup disk ok for backups?
-        backup_status=`/usr/lib/nagios/plugins/check_disk /dev/xvdb|echo $?`
+        backup_status=`/usr/lib/nagios/plugins/check_disk $backup_disk|echo $?`
                 if [ $backup_status -eq 0 ] ; then
                 echo "Disk $backup_disk status OK.  Continuing."
                 else
