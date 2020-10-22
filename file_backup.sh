@@ -7,7 +7,7 @@ folder_to_backup="/var/www"
 backup_location="/backups/filebackups"
 days_retain="7"
 backup_disk="/dev/xvdb"
-filename="filebackup_`date +%m-%d-%Y-%H.%m`"
+filename="filebackup_`date +%m-%d-%Y-%H.%M`"
 
 #if backup folder doesnt exit create it
         if [ -d "$backup_location" ]  ; then
