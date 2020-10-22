@@ -11,6 +11,7 @@ export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 MAILTO="jwaltz666@gmail.com;";
 mysqldir="/var/lib/mysql"
 logfile="/var/log/mysqlbackup.log"
+backup_folder="/backups/mysqlbackups/"
 
 #Abort if we cannot login as root
 mycnf=`cat /root/.my.cnf`
@@ -26,13 +27,13 @@ mysqllogin=`/usr/lib/nagios/plugins/check_mysql_health --user "$myuser" --passwo
 hour=`date +%H`
 fail=0
 backup_mysql () {
-        if [ ! -d /mysqlbackups/Sun/ ] ; then
-        mkdir /mysqlbackups/{,Sun,Mon,Tue,Wed,Thu,Fri,Sat}
+        if [ ! -d $backup_folder/Sun/ ] ; then
+        mkdir $backup_folder/{,Sun,Mon,Tue,Wed,Thu,Fri,Sat}
         fi
 
         for i in $(find ${mysqldir}/* -maxdepth 1 -type d|grep -v information_schema|grep -v performance_schema) ; do
         echo "`date` - Starting Dump on `basename $i`"
-        mysqldump --opt -Q -B $(basename $i) > /mysqlbackups/$(date +%a)/$(basename $i)-$hour.sql
+        mysqldump --opt -Q -B $(basename $i) > $backup_folder/$(date +%a)/$(basename $i)-$hour.sql
                 if [ $? -eq 0 ] ; then
                 echo "`date` - Success dumping database `basename $i`"
                 else
@@ -40,7 +41,7 @@ backup_mysql () {
                 fail=1
                 fi
         echo "`date` - Starting Compression of archive for `basename $i`"
-        gzip -f /mysqlbackups/$(date +%a)/$(basename $i)-$hour.sql
+        gzip -f $backup_folder/$(date +%a)/$(basename $i)-$hour.sql
                 if [ $? -eq 0 ] ; then
                 echo "`date` - Success Compressing `basename $i` database"
                 else
@@ -60,5 +61,4 @@ backup_mysql >> $logfile 2>&1
         fi
 echo "`date` - MysqlBackup Completed" >> $logfile
 echo "******************************************
-
 " >> $logfile
