@@ -3,6 +3,7 @@
 #apt-get install libdbd-mysql-perl libdbi-perl
 #wget -O /usr/lib/nagios/plugins/check_mysql_health https://raw.githubusercontent.com/holmes6/yo/master/check_mysql_health
 #chmod 755 /usr/lib/nagios/plugins/check_mysql_health
+#wget -O ~/mysqlbackups.sh https://raw.githubusercontent.com/holmes6/yo/master/mysqlbackups.sh && chmod 755 ~/mysqlbackups.sh
 #Crontab
 #0 */6 * * * ~/mysqlbackups.sh
 
