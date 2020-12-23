@@ -45,7 +45,7 @@ mysqllogin=`/usr/lib/nagios/plugins/check_mysql_health --user "$myuser" --passwo
         fi
 
 # Is the backup partition mounted and is there free space
-backupdisk=`df|grep "$backupdir"|cut -d " " -f 1`
+backupdisk=`df|grep "$backupdisk"|cut -d " " -f 1`
 isdisk=`/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p "$backupdisk"`
         if [ $? -eq 0 ] ; then
         #backupdisk is mounted and has free space
