@@ -3,8 +3,8 @@
 #wget -O /usr/lib/nagios/plugins/check_mysqlbackups https://raw.githubusercontent.com/holmes6/yo/master/check_mysqlbackups && chmod 755 /usr/lib/nagios/plugins/check_mysqlbackups
 #Set variables
 # Add to sudoers: %nagios ALL= NOPASSWD: /usr/bin/crontab, /bin/cat
-backupdir="/mysqlbackups"
-backupscript="~/mysqlbackup.sh"
+backupdir="/backups/mysqlbackups"
+backupscript="~/mysqlbackups.sh"
 
 #daily backup dir must be larger than this size
 minsize="899" #in KB - Tune this as size of backup changes
@@ -16,7 +16,8 @@ minarchives="4"  #Tune this as number dbs changes
 mandatorydb="catapult,event_login,livehelperchat"
 
 ########### END VARIABLES ############
-
+#extract root directory from backup directory
+backupdisk=`echo $backupdir|cut -d "/" -f 2`
 #set a stamp so we can create a unique temp file
 stamp=`date +%s`
 
